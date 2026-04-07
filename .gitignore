@@ -1,0 +1,9 @@
+*.class
+out/
+build/
+bin/
+
+.idea/
+*.iml
+
+*.csv
