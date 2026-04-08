@@ -1,0 +1,9 @@
+{
+    "java.project.sourcePaths": [
+        "."
+    ],
+    "java.project.referencedLibraries": [
+        "c:\\Users\\Excalibur\\Downloads\\mysql-connector-j-9.0.0\\mysql-connector-j-9.0.0\\mysql-connector-j-9.0.0.jar",
+        "c:\\Users\\Excalibur\\Downloads\\jbcrypt-0.4.jar"
+    ]
+}

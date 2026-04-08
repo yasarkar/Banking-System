@@ -1,0 +1,3 @@
+db.url=jdbc:mysql://localhost:3306/bankasistemi
+db.user=KULLANICI_ADINIZI_GIRIN
+db.password=SIFRENIZI_GIRIN
