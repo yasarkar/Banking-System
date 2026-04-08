@@ -38,9 +38,9 @@ public class UserOperations {
 
         String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
 
-        try (Connection connection = DatabaseManager.getConnection()) {
-            String query = "INSERT INTO users(userName, mail, password) VALUES(?, ?, ?)";
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
+        String query = "INSERT INTO users(userName, mail, password) VALUES(?, ?, ?)";
+        try (Connection connection = DatabaseManager.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, userName);
             preparedStatement.setString(2, email);
             preparedStatement.setString(3, hashedPassword);
@@ -74,27 +74,27 @@ public class UserOperations {
             System.out.print("Şifre => ");
             String password = scanner.nextLine();
 
-            try (Connection connection = DatabaseManager.getConnection()) {
-                String query = "SELECT * FROM users WHERE mail = ?";
-                PreparedStatement preparedStatement = connection.prepareStatement(query);
+            String query = "SELECT * FROM users WHERE mail = ?";
+            try (Connection connection = DatabaseManager.getConnection();
+                 PreparedStatement preparedStatement = connection.prepareStatement(query)) {
                 preparedStatement.setString(1, inputEmail);
 
-                ResultSet resultSet = preparedStatement.executeQuery();
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        String storedPassword = resultSet.getString("password");
+                        String username = resultSet.getString("userName");
 
-                if (resultSet.next()) {
-                    String storedPassword = resultSet.getString("password");
-                    String username = resultSet.getString("userName");
-
-                    if (BCrypt.checkpw(password, storedPassword)) {
-                        System.out.println("Hoş geldin! " + username.toUpperCase());
-                        return inputEmail;
+                        if (BCrypt.checkpw(password, storedPassword)) {
+                            System.out.println("Hoş geldin! " + username.toUpperCase());
+                            return inputEmail;
+                        } else {
+                            System.out.println("Giriş Başarısız. Şifre hatalı!");
+                        }
                     } else {
-                        System.out.println("Giriş Başarısız. Şifre hatalı!");
+                        System.out.println("Girdiğiniz mail adresi sistemde kayıtlı değil.");
                     }
-                } else {
-                    System.out.println("Girdiğiniz mail adresi sistemde kayıtlı değil.");
+                    System.out.println("Lütfen tekrar deneyiniz.\n");
                 }
-                System.out.println("Lütfen tekrar deneyiniz.\n");
             } catch (SQLException e) {
                 System.out.println("Veri tabanı hatası: " + e.getMessage());
                 return null;
@@ -106,9 +106,9 @@ public class UserOperations {
         System.out.print("Hesap Adı (Örn: Maaş Hesabım) => ");
         String accountName = scanner.nextLine();
 
-        try (Connection connection = DatabaseManager.getConnection()) {
-            String query = "INSERT INTO vadesizhesap(accountName, mail) VALUES(?, ?)";
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
+        String query = "INSERT INTO vadesizhesap(accountName, mail) VALUES(?, ?)";
+        try (Connection connection = DatabaseManager.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, accountName);
             preparedStatement.setString(2, userEmail);
 
@@ -129,9 +129,9 @@ public class UserOperations {
         System.out.print("Hesap Adı (Örn: Birikim Hesabım) => ");
         String accountName = scanner.nextLine();
 
-        try (Connection connection = DatabaseManager.getConnection()) {
-            String query = "INSERT INTO vadelihesap(accountName, mail) VALUES(?, ?)";
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
+        String query = "INSERT INTO vadelihesap(accountName, mail) VALUES(?, ?)";
+        try (Connection connection = DatabaseManager.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, accountName);
             preparedStatement.setString(2, userEmail);
 
