@@ -89,7 +89,7 @@ public class AccountOperations {
                 System.out.println("                      HESAP HAREKETLERİ DÖKÜMÜ                               ");
                 System.out.println("==============================================================================");
 
-                System.out.println(System.out.printf("%-22s | %-15s | %-12s | %-10s%n", "TARİH", "İŞLEM TÜRÜ", "MİKTAR", "HESAP"));
+                System.out.printf("%-22s | %-15s | %-12s | %-10s%n", "TARİH", "İŞLEM TÜRÜ", "MİKTAR", "HESAP");
 
                 boolean hasRecord = false;
                 while (resultSet.next()) {
