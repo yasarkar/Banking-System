@@ -39,23 +39,72 @@ public class UserOperations {
         String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
 
         String query = "INSERT INTO users(userName, mail, password) VALUES(?, ?, ?)";
-        try (Connection connection = DatabaseManager.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-            preparedStatement.setString(1, userName);
-            preparedStatement.setString(2, email);
-            preparedStatement.setString(3, hashedPassword);
+        try (Connection connection = DatabaseManager.getConnection()) {
 
-            int rowsAffected = preparedStatement.executeUpdate();
-            if (rowsAffected > 0) {
-                System.out.println("Kayıt başarıyla gerçekleştirildi.");
+            if (isUserNameRegistered(connection, userName)) {
+                System.out.println("Kayıt gerçekleştirilemedi. Bu kullanıcı adı zaten kullanılıyor.");
+                return;
+            }
+            if (isMailRegistered(connection, email)) {
+                System.out.println("Kayıt gerçekleştirilemedi. Bu e-posta adresi zaten kayıtlı.");
+                return;
+            }
+
+            try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+                preparedStatement.setString(1, userName);
+                preparedStatement.setString(2, email);
+                preparedStatement.setString(3, hashedPassword);
+
+                int rowsAffected = preparedStatement.executeUpdate();
+                if (rowsAffected > 0) {
+                    System.out.println("Kayıt başarıyla gerçekleştirildi.");
+                }
             }
         } catch (SQLException e) {
             if ("23000".equals(e.getSQLState())) {
-                System.out.println("Kayıt gerçekleştirilemedi. Bu mail adresi zaten kayıtlı!");
+                System.out.println(duplicateUserMessage(e));
             } else {
                 System.out.println("Veri tabanı hatası: " + e.getMessage());
             }
         }
+    }
+
+    private static boolean isUserNameRegistered(Connection connection, String userName) throws SQLException {
+        String sql = "SELECT 1 FROM users WHERE userName = ? LIMIT 1";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, userName);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
+    private static boolean isMailRegistered(Connection connection, String mail) throws SQLException {
+        String sql = "SELECT 1 FROM users WHERE mail = ? LIMIT 1";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, mail);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
+    /** Çift kayıt yarışı vb. durumlarda SQL mesajına göre kullanıcıya net geri bildirim. */
+    private static String duplicateUserMessage(SQLException e) {
+        String msg = e.getMessage();
+        if (msg != null) {
+            String lower = msg.toLowerCase();
+            int keyIdx = lower.indexOf("for key");
+            String hint = keyIdx >= 0 ? lower.substring(keyIdx) : lower;
+            if (hint.contains("username") || hint.contains("user_name")) {
+                return "Kayıt gerçekleştirilemedi. Bu kullanıcı adı zaten kullanılıyor.";
+            }
+            if (hint.contains("`mail`") || hint.contains("'mail'") || hint.contains("mail_unique")
+                    || hint.contains("idx_mail")) {
+                return "Kayıt gerçekleştirilemedi. Bu e-posta adresi zaten kayıtlı.";
+            }
+        }
+        return "Kayıt gerçekleştirilemedi. Bu kullanıcı adı veya e-posta adresi zaten kayıtlı.";
     }
 
     public static String login() {

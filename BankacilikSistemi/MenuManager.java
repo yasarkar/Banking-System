@@ -6,7 +6,8 @@ public class MenuManager {
 
     private final CheckingAccountOperations checkingOps = new CheckingAccountOperations();
     private final SavingsAccountOperations savingsOps = new SavingsAccountOperations();
-    private String activeUser;
+    /** Oturum açmış kullanıcının e-posta adresi (veritabanında mail ile eşleşir). */
+    private String activeUserEmail;
 
     public void startApp() throws SQLException {
         int choice;
@@ -19,8 +20,8 @@ public class MenuManager {
 
             switch (choice) {
                 case 1:
-                    activeUser = UserOperations.login();
-                    if (activeUser != null) {
+                    activeUserEmail = UserOperations.login();
+                    if (activeUserEmail != null) {
                         mainMenu();
                     }
                     break;
@@ -54,7 +55,7 @@ public class MenuManager {
                     openNewAccountMenu();
                     break;
                 case 2:
-                    if (checkingOps.checkIsAccountExist(activeUser)) {
+                    if (checkingOps.checkIsAccountExist(activeUserEmail)) {
                         checkingAccountMenu();
                     } else {
                         System.out.println("Vadesiz Hesabınız bulunmuyor.");
@@ -62,7 +63,7 @@ public class MenuManager {
                     }
                     break;
                 case 3:
-                    if (savingsOps.checkIsAccountExist(activeUser)) {
+                    if (savingsOps.checkIsAccountExist(activeUserEmail)) {
                         savingsAccountMenu();
                     } else {
                         System.out.println("Vadeli Hesabınız bulunmuyor.");
@@ -70,15 +71,18 @@ public class MenuManager {
                     }
                     break;
                 case 4:
-                    AccountOperations.showTransactionHistory(activeUser);
+                    AccountOperations.showTransactionHistory(activeUserEmail);
                     break;
                 case 5:
-                    AccountOperations.downloadAccountSummary(activeUser);
+                    AccountOperations.downloadAccountSummary(activeUserEmail);
                     break;
                 case 6:
                     System.out.println("Oturum kapatıldı.");
-                    activeUser = null;
+                    activeUserEmail = null;
                     return;
+                default:
+                    System.out.println("Geçersiz bir değer girdiniz. Lütfen 1 ile 6 arasında seçim yapınız.");
+                    break;
             }
         } while (choice != 6);
     }
@@ -92,10 +96,10 @@ public class MenuManager {
 
         switch (choice) {
             case 1:
-                UserOperations.openCheckingAccount(activeUser);
+                UserOperations.openCheckingAccount(activeUserEmail);
                 break;
             case 2:
-                UserOperations.openSavingsAccount(activeUser);
+                UserOperations.openSavingsAccount(activeUserEmail);
                 break;
             case 3:
                 return;
@@ -118,19 +122,22 @@ public class MenuManager {
 
             switch (choice) {
                 case 1:
-                    checkingOps.deposit(activeUser);
+                    checkingOps.deposit(activeUserEmail);
                     break;
                 case 2:
-                    checkingOps.withdraw(activeUser);
+                    checkingOps.withdraw(activeUserEmail);
                     break;
                 case 3:
-                    checkingOps.transferMoney(activeUser);
+                    checkingOps.transferMoney(activeUserEmail);
                     break;
                 case 4:
-                    checkingOps.displayBalance(activeUser);
+                    checkingOps.displayBalance(activeUserEmail);
                     break;
                 case 5:
                     return;
+                default:
+                    System.out.println("Geçersiz bir değer girdiniz. Lütfen 1 ile 5 arasında seçim yapınız.");
+                    break;
             }
         } while (choice != 5);
     }
@@ -147,16 +154,19 @@ public class MenuManager {
 
             switch (choice) {
                 case 1:
-                    savingsOps.deposit(activeUser);
+                    savingsOps.deposit(activeUserEmail);
                     break;
                 case 2:
-                    savingsOps.withdraw(activeUser);
+                    savingsOps.withdraw(activeUserEmail);
                     break;
                 case 3:
-                    savingsOps.displayBalance(activeUser);
+                    savingsOps.displayBalance(activeUserEmail);
                     break;
                 case 4:
                     return;
+                default:
+                    System.out.println("Geçersiz bir değer girdiniz. Lütfen 1 ile 4 arasında seçim yapınız.");
+                    break;
             }
         } while (choice != 4);
     }
